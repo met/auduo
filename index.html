@@ -42,22 +42,69 @@
 'use strict';
 
 function initUI() {
-	document.getElementById("p1").addEventListener("click", function() { document.getElementById("a1").play() } )
-	document.getElementById("p2").addEventListener("click", function() { document.getElementById("a2").play() } )
+	const errmsg_audiopairs = "Generate some audio pairs first.";
+	const errmsg_cannotplay = "There is some problem in audio.\nHave you entered correct lang code?";
 
-	document.getElementById("prandom").addEventListener("click", function() {
-		let randomIndex = Math.floor(Math.random() * 2) + 1;
-		console.log(randomIndex);
-		document.getElementById("a" + String(randomIndex)).play();
+	document.getElementById("p1").addEventListener("click", (event) => {
+		let audio = document.getElementById("a1");
+		if (audio.src)
+			audio.play().catch((error) => { alert(errmsg_cannotplay); console.log(error)} );
+		else
+			alert(errmsg_audiopairs);
 	});
 
-	document.getElementById("gen").addEventListener("click", function() {
+	document.getElementById("p2").addEventListener("click", (event) => {
+		let audio = document.getElementById("a2");
+		if (audio.src)
+			audio.play().catch((error) => { alert(errmsg_cannotplay); console.log(error)} );
+		else
+			alert(errmsg_audiopairs);
+	});
+
+	document.getElementById("prandom").addEventListener("click", (event) => {
+		let randomIndex = Math.floor(Math.random() * 2) + 1; // generate 1 or 2
+		console.log(randomIndex);
+
+		let audio = document.getElementById("a" + String(randomIndex));
+
+		if (audio.src)
+			audio.play().catch((error) => { alert(errmsg_cannotplay); console.log(error)} );
+		else
+			alert(errmsg_audiopairs);
+	});
+
+	document.getElementById("gen").addEventListener("click", (event) => {
 		let w1 = document.getElementById("w1").value;
 		let w2 = document.getElementById("w2").value;
-		let langCode = document.getElementById("lg-code").value.toLowerCase();
+		let lang = document.getElementById("lg-code").value.toLowerCase();
+		let audio1 = document.getElementById("a1");
+		let audio2 = document.getElementById("a2")
 
-		document.getElementById("a1").src = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(langCode)}&q=${encodeURIComponent(w1)}`;
-		document.getElementById("a2").src = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(langCode)}&q=${encodeURIComponent(w2)}`;
+		if (w1 === "" || w2 === "" || lang === "") {
+			alert("Cannot generate audio. Please fill all entries first.");
+			return;
+		}
+
+		audio1.src = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(lang)}&q=${encodeURIComponent(w1)}`;
+		audio2.src = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(lang)}&q=${encodeURIComponent(w2)}`;
+
+		let url = new URL(document.location);
+
+		history.replaceState(null, "", `?lc=${encodeURIComponent(lang)}&w1=${encodeURIComponent(w1)}&w2=${encodeURIComponent(w2)}`);
+	});
+
+	window.addEventListener("load", (event) => {
+		let params = new URL(document.location).searchParams;
+
+		if (params.get("lc"))
+			document.getElementById("lg-code").value = params.get("lc");
+
+		if (params.get("w1"))
+			document.getElementById("w1").value = params.get("w1");
+
+		if (params.get("w2"))
+			document.getElementById("w2").value = params.get("w2");
+
 	});
 }
 
